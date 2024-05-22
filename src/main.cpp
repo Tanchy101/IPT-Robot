@@ -87,6 +87,12 @@
 
 int duration;
 float distance;
+int measureDistance;
+
+const int enemyDistThreshold = 30;
+const int lineSensorThreshold = 500;
+
+ // Full speed for motor B
 
 void setup() {
   // Initialize pins
@@ -100,19 +106,12 @@ void setup() {
   pinMode(enableB, OUTPUT);
   pinMode(input2, OUTPUT);
   pinMode(input1, OUTPUT);
+
+  analogWrite(enableA, 255); // Full speed for motor A
+  analogWrite(enableB, 255);
 }
 
 void loop() {
-  // Trigger the ultrasonic sensor
-  digitalWrite(trigger, LOW);
-  delayMicroseconds(5);
-  digitalWrite(trigger, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigger, LOW);
-
-  // Read the echo pin
-  duration = pulseIn(echo, HIGH);
-  distance = duration * 0.034 / 2;  // Calculate distance
 
   // Spin initially
   digitalWrite(input1, LOW);
@@ -132,9 +131,62 @@ void loop() {
     analogWrite(enableB, 255);
     delay(500); // Delay to ensure the robot moves forward for a short duration
   }
+
+  // Trigger the ultrasonic sensor
+  digitalWrite(trigger, LOW);
+  delayMicroseconds(5);
+  digitalWrite(trigger, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigger, LOW);
+
+  int distance = measureDistance();
+  int rightLineSensorValue = analogRead(lineRight);
+  int leftLineSensorValue = analogRead(lineLeft);
+  // Read the echo pin
+  duration = pulseIn(echo, HIGH);
+  distance = duration * 0.034 / 2;  // Calculate distance
+
+  //for line tracking
+  if (leftLineSensorValue > lineSensorThreshold || rightLineSensorValue > lineSensorThreshold) {
+    moveBackward();
+    delay(500);
+  } else {
+    stopMoving();
+  }
+}
+  // for measuring distance
+  int measureDistance() {
+  // Send a 10us pulse to trigger pin
+  digitalWrite(trigger, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigger, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigger, LOW);
+  
+  // Measure the duration of the echo pin
+  long duration = pulseIn(echo, HIGH);
+  
+  // Calculate the distance in centimeters
+  int distance = duration * 0.034 / 2;
+  
+  return distance;
+}
+  
+
+
+void moveBackward() {
+  digitalWrite(input1, LOW);
+  digitalWrite(input2, HIGH);
+  digitalWrite(input3, LOW);
+  digitalWrite(input4, HIGH);
 }
 
-
+void stopMoving() {
+  digitalWrite(input1, LOW);
+  digitalWrite(input2, LOW);
+  digitalWrite(input3, LOW);
+  digitalWrite(input4, LOW);
+}
 // void loop() {
 
 
