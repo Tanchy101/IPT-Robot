@@ -87,10 +87,14 @@
 
 int duration;
 float distance;
-int measureDistance;
 
-const int enemyDistThreshold = 30;
-const int lineSensorThreshold = 500;
+const int enemyDistThreshold = 20;
+// const int lineSensorThreshold = 500;
+
+void moveBackward();\
+void Attack();
+void stopMoving();
+int measureDistance();
 
  // Full speed for motor B
 
@@ -114,23 +118,31 @@ void setup() {
 void loop() {
 
   // Spin initially
-  digitalWrite(input1, LOW);
-  digitalWrite(input2, HIGH);
-  analogWrite(enableA, 255);
-  digitalWrite(input4, HIGH);
-  digitalWrite(input3, LOW);
-  analogWrite(enableB, 255);
+  // digitalWrite(input1, LOW);
+  // digitalWrite(input2, HIGH);
+  // analogWrite(enableA, 255);
+  // digitalWrite(input4, HIGH);
+  // digitalWrite(input3, LOW);
+  // analogWrite(enableB, 255);
+
+  distance = measureDistance();
+
+  //aatake na to pards
+  if(distance <= enemyDistThreshold){
+    Attack();
+    delay(500);
+  }
 
   // If an object is detected within 10cm, move forward
-  if (distance <= 10) {
-    digitalWrite(input1, LOW);
-    digitalWrite(input2, HIGH);
-    analogWrite(enableA, 255);
-    digitalWrite(input4, LOW);
-    digitalWrite(input3, HIGH);
-    analogWrite(enableB, 255);
-    delay(500); // Delay to ensure the robot moves forward for a short duration
-  }
+  // if (distance <= 10) {
+  //   digitalWrite(input1, LOW);
+  //   digitalWrite(input2, HIGH);
+  //   analogWrite(enableA, 255);
+  //   digitalWrite(input4, LOW);
+  //   digitalWrite(input3, HIGH);
+  //   analogWrite(enableB, 255);
+  //   delay(500); // Delay to ensure the robot moves forward for a short duration
+  // }
 
   // Trigger the ultrasonic sensor
   digitalWrite(trigger, LOW);
@@ -139,19 +151,19 @@ void loop() {
   delayMicroseconds(10);
   digitalWrite(trigger, LOW);
 
-  int distance = measureDistance();
   int rightLineSensorValue = analogRead(lineRight);
   int leftLineSensorValue = analogRead(lineLeft);
   // Read the echo pin
-  duration = pulseIn(echo, HIGH);
-  distance = duration * 0.034 / 2;  // Calculate distance
+  // duration = pulseIn(echo, HIGH);
+  // distance = duration * 0.034 / 2;  // Calculate distance
 
   //for line tracking
-  if (leftLineSensorValue > lineSensorThreshold || rightLineSensorValue > lineSensorThreshold) {
+  if (leftLineSensorValue == LOW || rightLineSensorValue == LOW) {
     moveBackward();
     delay(500);
   } else {
     stopMoving();
+    delay(500);
   }
 }
   // for measuring distance
@@ -175,10 +187,12 @@ void loop() {
 
 
 void moveBackward() {
-  digitalWrite(input1, LOW);
-  digitalWrite(input2, HIGH);
-  digitalWrite(input3, LOW);
-  digitalWrite(input4, HIGH);
+  digitalWrite(input1, HIGH);   
+  digitalWrite(input2, LOW);
+  digitalWrite(input3, HIGH);   
+  digitalWrite(input4, LOW);
+  analogWrite(enableA, 255);
+  analogWrite(enableB, 255);
 }
 
 void stopMoving() {
@@ -186,6 +200,17 @@ void stopMoving() {
   digitalWrite(input2, LOW);
   digitalWrite(input3, LOW);
   digitalWrite(input4, LOW);
+  analogWrite(enableA, 0);
+  analogWrite(enableB, 0);
+}
+
+void Attack() {
+  digitalWrite(input1, LOW);
+  digitalWrite(input2, HIGH);
+  digitalWrite(input3, LOW);
+  digitalWrite(input4, HIGH);
+  analogWrite(enableA, 255);
+  analogWrite(enableB, 255);
 }
 // void loop() {
 
